@@ -1,4 +1,4 @@
-package be.webtechie.monitor;
+package be.webtechie.monitor.queue;
 
 /**
  * Defines the data structure for a single reading at a specific time from a single device.

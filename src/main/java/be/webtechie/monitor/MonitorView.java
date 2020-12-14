@@ -1,5 +1,6 @@
 package be.webtechie.monitor;
 
+import be.webtechie.monitor.queue.QueueClient;
 import com.almasb.fxgl.animation.Interpolators;
 import javafx.geometry.Point2D;
 import javafx.scene.Parent;
@@ -11,7 +12,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
-import javafx.util.Duration;
 
 import static be.webtechie.monitor.Config.*;
 import static com.almasb.fxgl.dsl.FXGL.animationBuilder;
@@ -19,6 +19,7 @@ import static com.almasb.fxgl.dsl.FXGL.getUIFactoryService;
 
 public class MonitorView extends Parent {
 
+    private QueueClient queueClient;
     private String name;
     private DataSource dataSource;
 
@@ -33,7 +34,8 @@ public class MonitorView extends Parent {
     private CollapsedView collapsedView;
     private ExpandedView expandedView;
 
-    public MonitorView(String name, DataSource dataSource) {
+    public MonitorView(QueueClient queueClient, String name, DataSource dataSource) {
+        this.queueClient = queueClient;
         this.name = name;
         this.dataSource = dataSource;
 
