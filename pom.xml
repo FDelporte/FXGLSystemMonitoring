@@ -17,6 +17,7 @@
 
         <!-- dependencies -->
         <fxgl.version>11.12</fxgl.version>
+        <mqtt.version>1.2.2</mqtt.version>
         <jfx.maven.plugin.version>0.0.4</jfx.maven.plugin.version>
 
         <mainClassName>be.webtechie.monitor.MonitorApp</mainClassName>
@@ -32,7 +33,7 @@
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-            <version>1.2.2</version>
+            <version>${mqtt.version}</version>
         </dependency>
     </dependencies>
 
