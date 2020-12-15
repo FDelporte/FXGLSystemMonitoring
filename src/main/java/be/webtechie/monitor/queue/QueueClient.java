@@ -11,13 +11,19 @@ public class QueueClient {
     private MqttClient client;
 
     private final ObservableList<Reading> queueItems = FXCollections.observableArrayList();
+
+    private final String ipAddress;
     private final String topicName;
 
     public QueueClient(String ipAddress, String topicName) {
+        this.ipAddress = ipAddress;
+        this.topicName = topicName;
+    }
+
+    public void initConnection() {
         if (!initConnection(ipAddress)) {
             System.err.println("Initializing connection failed");
         }
-        this.topicName = topicName;
         connect();
         subscribe();
     }

@@ -2,6 +2,7 @@ package be.webtechie.monitor;
 
 import be.webtechie.monitor.queue.QueueClient;
 import com.almasb.fxgl.animation.Interpolators;
+import com.almasb.fxgl.core.Updatable;
 import javafx.geometry.Point2D;
 import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
@@ -39,7 +40,7 @@ public class MonitorView extends Parent {
         this.name = name;
         this.dataSource = dataSource;
 
-        collapsedView = new CollapsedView(name);
+        collapsedView = new CollapsedView(name, dataSource);
         expandedView = new ExpandedView(name);
 
         bg = new Rectangle(MONITOR_WIDTH, MONITOR_HEIGHT);
@@ -55,10 +56,13 @@ public class MonitorView extends Parent {
             }
         });
 
-        //setCache(true);
-        //setCacheHint(CacheHint.);
-
         getChildren().addAll(bg, collapsedView);
+    }
+
+    public void onUpdate() {
+        // TODO: tpf may not be needed, depends on end result
+        collapsedView.onUpdate(0.016);
+        expandedView.onUpdate(0.016);
     }
 
     public void expand() {
@@ -143,21 +147,28 @@ public class MonitorView extends Parent {
                 .buildAndPlay();
     }
 
-    private class CollapsedView extends Parent {
+    private class CollapsedView extends Parent implements Updatable {
         private Text title;
 
-        CollapsedView(String name) {
+        private Text textCPU = new Text("CPU: %");
+        private Text textRAM = new Text("RAM: %");
+        private Text textDisk = new Text("DISK: %");
+
+        private DataSource dataSource;
+
+        CollapsedView(String name, DataSource dataSource) {
+            this.dataSource = dataSource;
+
             title = getUIFactoryService().newText(name, Color.WHITE, 14.0);
             title.setTranslateX(MONITOR_WIDTH / 2.0 - title.getLayoutBounds().getWidth() / 2.0);
             title.setTranslateY(15);
 
-            Text textCPU = new Text("CPU: %");
+            // TODO: extract into a custom Text class
+            // TODO: color code values, e.g. 75%+ RED, 50%+ ORANGE, 25%+ YELLOW, 0%+ GREEN
             textCPU.setFill(Color.WHITE);
 
-            Text textRAM = new Text("RAM: %");
             textRAM.setFill(Color.WHITE);
 
-            Text textDisk = new Text("DISK: %");
             textDisk.setFill(Color.WHITE);
 
             VBox box = new VBox(5, textCPU, textRAM, textDisk);
@@ -166,9 +177,18 @@ public class MonitorView extends Parent {
 
             getChildren().addAll(title, box);
         }
+
+        @Override
+        public void onUpdate(double tpf) {
+            var reading = dataSource.getReading();
+
+            textCPU.setText(String.format("CPU: %.2f %s", reading.getCpuUsage(), "%"));
+            textRAM.setText(String.format("RAM: %.2f %s", reading.getRamUsage(), "%"));
+            textDisk.setText(String.format("DISK: %.2f %s", reading.getDiskUsage(), "%"));
+        }
     }
 
-    private class ExpandedView extends Parent {
+    private class ExpandedView extends Parent implements Updatable {
         private Text title;
 
         ExpandedView(String name) {
@@ -193,6 +213,11 @@ public class MonitorView extends Parent {
             lineChart.setTranslateY(title.getTranslateY() + 80);
 
             getChildren().addAll(title, lineChart);
+        }
+
+        @Override
+        public void onUpdate(double tpf) {
+
         }
     }
 }

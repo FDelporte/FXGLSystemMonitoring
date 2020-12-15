@@ -26,7 +26,7 @@ public class ClientCallback implements MqttCallback {
         Platform.runLater(() -> {
             // TODO get data from queue message
             // mqttMessage.getPayload()
-            queueItems.add(new Reading());
+            //queueItems.add(new Reading());
         });
     }
 
