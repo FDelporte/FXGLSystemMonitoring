@@ -17,6 +17,9 @@ Mosquitto) and run the JavaFX dashboard.
 
 ### Installing Mosquitto on the Raspberry Pi
 
+Installing Mosquitto can be done with the following commands, which will also configure it as a service which will start
+whenover your Raspberry Pi is (re)powered.
+
 ```
 $ sudo apt update
 $ sudo apt install -y mosquitto mosquitto-clients
@@ -32,6 +35,8 @@ $ mosquitto -v
 1569780732: Opening ipv4 listen socket on port 1883.
 1569780732: Error: Address already in use
 ```
+
+The last line with the error message can be ignored.
 
 ### Testing Mosquitto on the Pi
 
@@ -55,11 +60,24 @@ Every "publish" from the second terminal window will appear in the first one.
 {width: 80%}
 ![Testing Mosquitto on the Pi](images/mosquitto_testing.png)
 
-## Send state application
+## Send state from Raspberry Pi
 
-To send the state from another Raspberry Pi to Mosquitto, a separate app is available on GitHub.
+To send the state from another Raspberry Pi to Mosquitto, a separate app is available on GitHub. For this script we are
+using Python as we only need some minimal example data which is easily available in Python. Of course the same could be
+done with Java, but let's embrace Python for once ;-)
 
-// TODO
+### Extra dependencies
+
+If you started from the default Raspberry Pi OS, Python is already installed, we only need to add two extra libraries
+with the pip-command to send data to the queue (with paho) and get device status info (with psutil).
+
+```
+pip install paho-mqtt
+pip install psutil
+```
+
+In this example we are only using a subset of all the data which is available from psutil to show as a proof-of-concept.
+A full overview is available on [pypi.org/project/psutil](https://pypi.org/project/psutil/).
 
 ## Monitoring application
 

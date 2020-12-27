@@ -1,31 +1,7 @@
-*.class
-
-# Package Files #
-*.war
-*.ear
-
-# Eclipse #
-.classpath
-.project
-.settings/
-bin/
-
-# IDEA #
 .idea/
 *.iml
-out/
-
-# Maven #
-dependency-reduced-pom.xml
 target/
-
-# Gradle #
-.gradle/
-
-# logs #
-*.log
-logs/
-system/
-
-# mqtt #
+venv/
 paho*
+/logs/*.log
+/system/

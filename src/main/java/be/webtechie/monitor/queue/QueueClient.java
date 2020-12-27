@@ -18,6 +18,7 @@ public class QueueClient {
     public QueueClient(String ipAddress, String topicName) {
         this.ipAddress = ipAddress;
         this.topicName = topicName;
+        initConnection();
     }
 
     public void initConnection() {

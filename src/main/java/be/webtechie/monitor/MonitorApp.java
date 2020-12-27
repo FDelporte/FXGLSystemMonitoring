@@ -10,10 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static be.webtechie.monitor.Config.*;
-import static com.almasb.fxgl.core.math.FXGLMath.*;
-import static com.almasb.fxgl.dsl.FXGL.*;
+import static com.almasb.fxgl.core.math.FXGLMath.noise1D;
+import static com.almasb.fxgl.dsl.FXGL.addUINode;
+import static com.almasb.fxgl.dsl.FXGL.run;
 
 public class MonitorApp extends GameApplication {
+
+    private static final String TOPIC_NAME = "topic/statsCollector";
 
     private QueueClient queueClient;
 
@@ -29,7 +32,7 @@ public class MonitorApp extends GameApplication {
 
     @Override
     protected void initGame() {
-        queueClient = new QueueClient("192.168.0.213", "deviceStates/state");
+        queueClient = new QueueClient("192.168.0.223", TOPIC_NAME);
         monitors = new ArrayList<>();
 
         // connect in a bg thread, so we can load the app quicker
