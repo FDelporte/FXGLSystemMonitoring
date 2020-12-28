@@ -1,6 +1,6 @@
 package be.webtechie.monitor;
 
-import be.webtechie.monitor.queue.Reading;
+import be.webtechie.monitor.data.Reading;
 
 @FunctionalInterface
 public interface DataSource {

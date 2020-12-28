@@ -1,5 +1,6 @@
 package be.webtechie.monitor.queue;
 
+import be.webtechie.monitor.data.Reading;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;

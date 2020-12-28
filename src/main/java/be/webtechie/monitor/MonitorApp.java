@@ -1,7 +1,7 @@
 package be.webtechie.monitor;
 
+import be.webtechie.monitor.data.Reading;
 import be.webtechie.monitor.queue.QueueClient;
-import be.webtechie.monitor.queue.Reading;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.math.FXGLMath;
@@ -59,7 +59,10 @@ public class MonitorApp extends GameApplication {
                         public Reading getReading() {
                             t += 0.00016;
 
-                            return new Reading(noise1D(t * 7) * 90, noise1D((t + 1000) * 2) * 40, noise1D((t + 3000) * 3) * 75);
+                            return new Reading(
+                                    noise1D(t * 7) * 90,
+                                    (long) (noise1D((t + 1000) * 2) * 40),
+                                    (long) (noise1D((t + 3000) * 3) * 75));
                         }
                     },
                     x,

@@ -184,7 +184,7 @@ public class MonitorView extends Parent {
 
             textCPU.setText(String.format("CPU: %.2f %s", reading.getCpuUsage(), "%"));
             textRAM.setText(String.format("RAM: %.2f %s", reading.getRamUsage(), "%"));
-            textDisk.setText(String.format("DISK: %.2f %s", reading.getDiskUsage(), "%"));
+            textDisk.setText(String.format("DISK: %.2f %s", reading.getNetworkReceived(), "%"));
         }
     }
 
