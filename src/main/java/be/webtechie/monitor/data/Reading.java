@@ -15,7 +15,7 @@ public final class Reading {
     @JsonbProperty("ipAddress")
     private String ipAddress;
 
-    @JsonbProperty("first-name")
+    @JsonbProperty("cpu")
     private double cpuUsage;
 
     @JsonbProperty("swap_memory")
@@ -39,20 +39,19 @@ public final class Reading {
         network.setPacketsReceived(networkReceived);
     }
 
-    public double getCpuUsage() {
-        return cpuUsage;
-    }
-
-    public double getRamUsage() {
-        return virtualMemory.getUsed();
-    }
-
-    public double getNetworkReceived() {
-        return network.getPacketsReceived();
+    public void update(Reading reading) {
+        cpuUsage = reading.getCpuUsage();
+        swapMemory = reading.getSwapMemory();
+        virtualMemory = reading.getVirtualMemory();
+        network = reading.getNetwork();
     }
 
     public String getHostname() {
         return hostname;
+    }
+
+    public double getCpuUsage() {
+        return cpuUsage;
     }
 
     public void setHostname(String hostname) {

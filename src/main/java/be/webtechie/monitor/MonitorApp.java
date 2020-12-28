@@ -4,13 +4,12 @@ import be.webtechie.monitor.data.Reading;
 import be.webtechie.monitor.queue.QueueClient;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
-import com.almasb.fxgl.core.math.FXGLMath;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static be.webtechie.monitor.Config.*;
-import static com.almasb.fxgl.core.math.FXGLMath.noise1D;
 import static com.almasb.fxgl.dsl.FXGL.addUINode;
 import static com.almasb.fxgl.dsl.FXGL.run;
 
@@ -36,20 +35,32 @@ public class MonitorApp extends GameApplication {
         monitors = new ArrayList<>();
 
         // connect in a bg thread, so we can load the app quicker
-        //getExecutor().startAsync(() -> queueClient.initConnection());
+        // getExecutor().startAsync(() -> queueClient.initConnection());
 
-        addMockData();
+        if (!queueClient.isConnected()) {
+            addMockData();
+        }
 
         run(() -> {
-            monitors.forEach(MonitorView::onUpdate);
+            for (Reading reading : queueClient.getReadings()) {
+                Optional<MonitorView> existingMonitorView = monitors.stream()
+                        .filter(m -> m.getIpAddress().equals(reading.getIpAddress()))
+                        .findFirst();
+                if (existingMonitorView.isPresent()) {
+                    existingMonitorView.get().onReading(reading);
+                } else {
+                    MonitorView newMonitorView = addMonitor(reading.getHostname(), reading.getIpAddress());
+                    newMonitorView.onReading(reading);
+                }
+            }
         }, DATA_UPDATE_FREQUENCY);
     }
 
     private void addMockData() {
-        for (int i = 0; i < 10; i++) {
-            var x = (i % NUM_MONITORS_PER_ROW) * MONITOR_WIDTH;
-            var y = (i / NUM_MONITORS_PER_ROW) * MONITOR_HEIGHT;
+        /*
+        TODO
 
+        for (int i = 0; i < 10; i++) {
             addMonitor(
                     "Device-" + i,
                     new DataSource() {
@@ -69,13 +80,16 @@ public class MonitorApp extends GameApplication {
                     y
             );
         }
+        */
     }
 
-    private void addMonitor(String name, DataSource dataSource, double x, double y) {
-        var monitor = new MonitorView(queueClient, name, dataSource);
-
+    private MonitorView addMonitor(String name, String ipAddress) {
+        var monitor = new MonitorView(name, ipAddress);
         monitors.add(monitor);
+        var x = ((monitors.size() - 1) % NUM_MONITORS_PER_ROW) * MONITOR_WIDTH;
+        var y = ((monitors.size() - 1) / NUM_MONITORS_PER_ROW) * MONITOR_HEIGHT;
         addUINode(monitor, x, y);
+        return monitor;
     }
 
     public static void main(String[] args) {

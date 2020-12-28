@@ -15,7 +15,7 @@ public class ReadingTest {
         String json = "{"
                 + "\"hostname\":\"raspberrypi\", "
                 + "\"ipAddress\":\"192.168.0.223\", "
-                + "\"cpu\":\"0.0\", "
+                + "\"cpu\":\"6.8\", "
                 + "\"swap_memory\": {   \"total\":\"123456\",    \"used\":\"789456\",   \"free\":\"369852\",   \"percent\":\"85.6\"  }, "
                 + "\"virtual_memory\": {   \"total\":\"8258498560\",   \"available\":\"7948976128\",   \"used\":\"62726144\",   \"free\":\"8025878528\",   \"percent\":\"3.7\" }, "
                 + "\"network\": {   \"bytes_sent\":\"1036466\",   \"bytes_received\":\"735638\",   \"packets_sent\":\"3941\",   \"packets_received\":\"4916\" } "
@@ -29,7 +29,7 @@ public class ReadingTest {
         assertAll(
                 () -> assertEquals("raspberrypi", reading.getHostname()),
                 () -> assertEquals("192.168.0.223", reading.getIpAddress()),
-                () -> assertEquals(0.0, reading.getCpuUsage(), 0.1),
+                () -> assertEquals(6.8, reading.getCpuUsage(), 0.1),
                 () -> assertEquals(123456, reading.getSwapMemory().getTotal()),
                 () -> assertEquals(789456, reading.getSwapMemory().getUsed()),
                 () -> assertEquals(369852, reading.getSwapMemory().getFree()),

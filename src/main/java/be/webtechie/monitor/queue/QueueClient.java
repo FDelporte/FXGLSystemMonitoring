@@ -1,17 +1,18 @@
 package be.webtechie.monitor.queue;
 
 import be.webtechie.monitor.data.Reading;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class QueueClient {
 
     private MqttClient client;
 
-    private final ObservableList<Reading> queueItems = FXCollections.observableArrayList();
+    private final Set<Reading> readings = ConcurrentHashMap.newKeySet();
 
     private final String ipAddress;
     private final String topicName;
@@ -49,9 +50,13 @@ public class QueueClient {
         }
     }
 
+    public boolean isConnected() {
+        return client.isConnected();
+    }
+
     private void subscribe() {
         try {
-            client.setCallback(new ClientCallback(queueItems));
+            client.setCallback(new ClientCallback(readings));
             client.subscribe(topicName);
         } catch (MqttException ex) {
             System.err.println("Error while subscribing: " + ex.getMessage());
@@ -73,8 +78,8 @@ public class QueueClient {
         }
     }
 
-    public ObservableList<Reading> getQueueItems() {
-        return queueItems;
+    public Set<Reading> getReadings() {
+        return readings;
     }
 
     public void disconnect() {

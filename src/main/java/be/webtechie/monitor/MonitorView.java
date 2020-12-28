@@ -1,8 +1,7 @@
 package be.webtechie.monitor;
 
-import be.webtechie.monitor.queue.QueueClient;
+import be.webtechie.monitor.data.Reading;
 import com.almasb.fxgl.animation.Interpolators;
-import com.almasb.fxgl.core.Updatable;
 import javafx.geometry.Point2D;
 import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
@@ -18,11 +17,10 @@ import static be.webtechie.monitor.Config.*;
 import static com.almasb.fxgl.dsl.FXGL.animationBuilder;
 import static com.almasb.fxgl.dsl.FXGL.getUIFactoryService;
 
-public class MonitorView extends Parent {
+public class MonitorView extends Parent implements ReadingHandler {
 
-    private QueueClient queueClient;
     private String name;
-    private DataSource dataSource;
+    private String ipAddress;
 
     private boolean isExpanded = false;
     private boolean isAnimating = false;
@@ -35,12 +33,11 @@ public class MonitorView extends Parent {
     private CollapsedView collapsedView;
     private ExpandedView expandedView;
 
-    public MonitorView(QueueClient queueClient, String name, DataSource dataSource) {
-        this.queueClient = queueClient;
+    public MonitorView(String name, String ipAddress) {
         this.name = name;
-        this.dataSource = dataSource;
+        this.ipAddress = ipAddress;
 
-        collapsedView = new CollapsedView(name, dataSource);
+        collapsedView = new CollapsedView(name, ipAddress);
         expandedView = new ExpandedView(name);
 
         bg = new Rectangle(MONITOR_WIDTH, MONITOR_HEIGHT);
@@ -59,10 +56,14 @@ public class MonitorView extends Parent {
         getChildren().addAll(bg, collapsedView);
     }
 
-    public void onUpdate() {
-        // TODO: tpf may not be needed, depends on end result
-        collapsedView.onUpdate(0.016);
-        expandedView.onUpdate(0.016);
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    @Override
+    public void onReading(Reading reading) {
+        collapsedView.onReading(reading);
+        expandedView.onReading(reading);
     }
 
     public void expand() {
@@ -147,48 +148,46 @@ public class MonitorView extends Parent {
                 .buildAndPlay();
     }
 
-    private class CollapsedView extends Parent implements Updatable {
-        private Text title;
+    private class CollapsedView extends Parent implements ReadingHandler {
+        private Text titleName;
+        private Text titleIpAddress;
 
         private Text textCPU = new Text("CPU: %");
         private Text textRAM = new Text("RAM: %");
         private Text textDisk = new Text("DISK: %");
 
-        private DataSource dataSource;
+        CollapsedView(String name, String ipAddress) {
+            titleName = getUIFactoryService().newText(name, Color.WHITE, 12.0);
+            titleName.setTranslateX(MONITOR_WIDTH / 2.0 - titleName.getLayoutBounds().getWidth() / 2.0);
+            titleName.setTranslateY(15);
 
-        CollapsedView(String name, DataSource dataSource) {
-            this.dataSource = dataSource;
-
-            title = getUIFactoryService().newText(name, Color.WHITE, 14.0);
-            title.setTranslateX(MONITOR_WIDTH / 2.0 - title.getLayoutBounds().getWidth() / 2.0);
-            title.setTranslateY(15);
+            titleIpAddress = getUIFactoryService().newText(ipAddress, Color.WHITE, 12.0);
+            titleIpAddress.setTranslateX(MONITOR_WIDTH / 2.0 - titleIpAddress.getLayoutBounds().getWidth() / 2.0);
+            titleIpAddress.setTranslateY(30);
 
             // TODO: extract into a custom Text class
             // TODO: color code values, e.g. 75%+ RED, 50%+ ORANGE, 25%+ YELLOW, 0%+ GREEN
             textCPU.setFill(Color.WHITE);
-
             textRAM.setFill(Color.WHITE);
-
             textDisk.setFill(Color.WHITE);
 
             VBox box = new VBox(5, textCPU, textRAM, textDisk);
             box.setTranslateX(10);
-            box.setTranslateY(title.getTranslateY() + 30);
+            box.setTranslateY(titleName.getTranslateY() + 20);
+            box.setTranslateY(titleIpAddress.getTranslateY() + 40);
 
-            getChildren().addAll(title, box);
+            getChildren().addAll(titleName, titleIpAddress, box);
         }
 
         @Override
-        public void onUpdate(double tpf) {
-            var reading = dataSource.getReading();
-
+        public void onReading(Reading reading) {
             textCPU.setText(String.format("CPU: %.2f %s", reading.getCpuUsage(), "%"));
-            textRAM.setText(String.format("RAM: %.2f %s", reading.getRamUsage(), "%"));
-            textDisk.setText(String.format("DISK: %.2f %s", reading.getNetworkReceived(), "%"));
+            textRAM.setText(String.format("RAM: %d", reading.getVirtualMemory().getUsed()));
+            textDisk.setText(String.format("PACKETS: %d", reading.getNetwork().getPacketsReceived()));
         }
     }
 
-    private class ExpandedView extends Parent implements Updatable {
+    private class ExpandedView extends Parent implements ReadingHandler {
         private Text title;
 
         ExpandedView(String name) {
@@ -216,8 +215,8 @@ public class MonitorView extends Parent {
         }
 
         @Override
-        public void onUpdate(double tpf) {
-
+        public void onReading(Reading reading) {
+            // TODO
         }
     }
 }

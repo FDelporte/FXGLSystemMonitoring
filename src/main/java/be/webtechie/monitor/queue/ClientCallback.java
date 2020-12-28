@@ -1,18 +1,23 @@
 package be.webtechie.monitor.queue;
 
 import be.webtechie.monitor.data.Reading;
-import javafx.application.Platform;
-import javafx.collections.ObservableList;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.util.Optional;
+import java.util.Set;
+
 public class ClientCallback implements MqttCallback {
 
-    private final ObservableList<Reading> queueItems;
+    private final Set<Reading> readings;
+    private final Jsonb jsonb;
 
-    public ClientCallback(ObservableList<Reading> queueItems) {
-        this.queueItems = queueItems;
+    public ClientCallback(Set<Reading> readings) {
+        this.readings = readings;
+        jsonb = JsonbBuilder.create();
     }
 
     @Override
@@ -22,13 +27,22 @@ public class ClientCallback implements MqttCallback {
 
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) {
-        System.out.println("Message received:\n\t" + new String(mqttMessage.getPayload()));
+        String data = new String(mqttMessage.getPayload());
+        System.out.println("Message received:\n\t" + data);
 
-        Platform.runLater(() -> {
-            // TODO get data from queue message
-            // mqttMessage.getPayload()
-            //queueItems.add(new Reading());
-        });
+        try {
+            Reading reading = jsonb.fromJson(data, Reading.class);
+            Optional<Reading> existing = readings.stream()
+                    .filter(r -> r.getIpAddress().equals(reading.getIpAddress()))
+                    .findAny();
+            if (existing.isPresent()) {
+                existing.get().update(reading);
+            } else {
+                readings.add(reading);
+            }
+        } catch (Exception ex) {
+            System.err.println("Error while parsing received data: " + ex.getMessage());
+        }
     }
 
     @Override
