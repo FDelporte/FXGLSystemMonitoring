@@ -93,4 +93,11 @@ public final class Reading {
     public void setNetwork(Network network) {
         this.network = network;
     }
+
+    /**
+     * @return a new (effectively immutable) object that contains reading information for internal buffer
+     */
+    public Reading copy() {
+        return new Reading(cpuUsage, virtualMemory.getUsed(), network.getPacketsReceived());
+    }
 }

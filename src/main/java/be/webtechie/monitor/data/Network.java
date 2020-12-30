@@ -51,5 +51,4 @@ public class Network {
     public void setPacketsReceived(long packetsReceived) {
         this.packetsReceived = packetsReceived;
     }
-
 }

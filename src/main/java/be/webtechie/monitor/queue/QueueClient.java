@@ -50,10 +50,6 @@ public class QueueClient {
         }
     }
 
-    public boolean isConnected() {
-        return client.isConnected();
-    }
-
     private void subscribe() {
         try {
             client.setCallback(new ClientCallback(readings));
@@ -78,15 +74,19 @@ public class QueueClient {
         }
     }
 
-    public Set<Reading> getReadings() {
-        return readings;
-    }
-
     public void disconnect() {
         try {
             client.disconnect();
         } catch (MqttException ex) {
             System.err.println("MqttException: " + ex.getMessage());
         }
+    }
+
+    public boolean isConnected() {
+        return client.isConnected();
+    }
+
+    public Set<Reading> getReadings() {
+        return readings;
     }
 }

@@ -35,6 +35,7 @@ public class ClientCallback implements MqttCallback {
             Optional<Reading> existing = readings.stream()
                     .filter(r -> r.getIpAddress().equals(reading.getIpAddress()))
                     .findAny();
+
             if (existing.isPresent()) {
                 existing.get().update(reading);
             } else {
