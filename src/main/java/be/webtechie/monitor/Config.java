@@ -23,5 +23,5 @@ public final class Config {
     /**
      * How often to read from the data source to pull latest info.
      */
-    public static final Duration DATA_UPDATE_FREQUENCY = Duration.seconds(0.5);
+    public static final Duration DATA_UPDATE_FREQUENCY = Duration.seconds(1.0);
 }

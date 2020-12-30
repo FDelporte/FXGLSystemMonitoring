@@ -2,11 +2,13 @@ package be.webtechie.monitor;
 
 import be.webtechie.monitor.data.Reading;
 import com.almasb.fxgl.animation.Interpolators;
+import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -46,7 +48,7 @@ public class MonitorView extends Parent implements ReadingHandler {
         collapsedView = new CollapsedView(name, ipAddress);
         expandedView = new ExpandedView(name);
 
-        bg = new Rectangle(MONITOR_WIDTH, MONITOR_HEIGHT);
+        bg = new Rectangle(MONITOR_WIDTH, MONITOR_HEIGHT, Color.rgb(5, 5, 5));
         bg.setStrokeType(StrokeType.INSIDE);
         bg.setStroke(Color.MEDIUMAQUAMARINE);
         bg.setStrokeWidth(2);
@@ -160,9 +162,7 @@ public class MonitorView extends Parent implements ReadingHandler {
         private Text titleName;
         private Text titleIpAddress;
 
-        private Text textCPU = new Text("CPU: %");
-        private Text textRAM = new Text("RAM: %");
-        private Text textPackets = new Text("DISK: %");
+        private List<LoadView> views = new ArrayList<>();
 
         CollapsedView(String name, String ipAddress) {
             titleName = getUIFactoryService().newText(name, Color.WHITE, 12.0);
@@ -173,25 +173,69 @@ public class MonitorView extends Parent implements ReadingHandler {
             titleIpAddress.setTranslateX(MONITOR_WIDTH / 2.0 - titleIpAddress.getLayoutBounds().getWidth() / 2.0);
             titleIpAddress.setTranslateY(30);
 
-            // TODO: extract into a custom Text class
-            // TODO: color code values, e.g. 75%+ RED, 50%+ ORANGE, 25%+ YELLOW, 0%+ GREEN
-            textCPU.setFill(Color.WHITE);
-            textRAM.setFill(Color.WHITE);
-            textPackets.setFill(Color.WHITE);
+            views.add(new LoadView("CPU", r -> r.getCpuUsage()));
+            views.add(new LoadView("RAM", r -> r.getVirtualMemory().getUsed() * 1.0));
 
-            VBox box = new VBox(5, textCPU, textRAM, textPackets);
+            HBox box = new HBox(5);
             box.setTranslateX(10);
-            box.setTranslateY(titleName.getTranslateY() + 20);
-            box.setTranslateY(titleIpAddress.getTranslateY() + 40);
+            box.setTranslateY(titleIpAddress.getTranslateY() + 20);
+            box.setAlignment(Pos.BOTTOM_LEFT);
+            box.setPrefHeight(MONITOR_HEIGHT / 2.5 + 40);
+
+            views.forEach(box.getChildren()::add);
 
             getChildren().addAll(titleName, titleIpAddress, box);
         }
 
         @Override
         public void onReading(Reading reading) {
-            textCPU.setText(String.format("CPU: %.2f %s", reading.getCpuUsage(), "%"));
-            textRAM.setText(String.format("RAM: %d", reading.getVirtualMemory().getUsed()));
-            textPackets.setText(String.format("PACKETS: %d", reading.getNetwork().getPacketsReceived()));
+            views.forEach(v -> v.onReading(reading));
+        }
+    }
+
+    private class LoadView extends VBox implements ReadingHandler {
+
+        private final Function<Reading, Double> dataExtractor;
+
+        private String name;
+        private Text text;
+        private Rectangle loadRect = new Rectangle(20, MONITOR_HEIGHT / 2.0);
+
+        LoadView(String name, Function<Reading, Double> dataExtractor) {
+            this.dataExtractor = dataExtractor;
+            this.name = name;
+
+            text = new Text(name);
+            text.setFill(Color.WHITE);
+
+            setAlignment(Pos.BOTTOM_CENTER);
+            setPrefWidth(80);
+            setPrefHeight(loadRect.getHeight() + 20.0);
+
+            getChildren().addAll(loadRect, text);
+        }
+
+        @Override
+        public void onReading(Reading reading) {
+            var value = dataExtractor.apply(reading);
+
+            loadRect.setHeight( (value / 100.0) * MONITOR_HEIGHT / 2.0 );
+            loadRect.setFill(getColor(value));
+
+            text.setText(String.format(name + ": %.2f %s", value, "%"));
+        }
+
+        // color code values, e.g. 75%+ RED, 50%+ ORANGE, 25%+ YELLOW, 0%+ GREEN
+        private Color getColor(double value) {
+            if (value >= 75) {
+                return Color.RED;
+            } else if (value >= 50) {
+                return Color.ORANGE;
+            } else if (value >= 25) {
+                return Color.YELLOW;
+            }
+
+            return Color.GREEN;
         }
     }
 

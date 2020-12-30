@@ -77,7 +77,7 @@ public class MonitorApp extends GameApplication {
                 var t = random(0.5, 150000.0);
 
                 var reading = new Reading(
-                        noise1D(t * 7) * 90,
+                        noise1D(t * 7) * 100,
                         (long) (noise1D((t + 1000) * 2) * 40),
                         (long) (noise1D((t + 3000) * 3) * 75)
                 );
