@@ -18,7 +18,7 @@ public final class Config {
 
     public static final double MONITOR_SCALE_RATIO = APP_WIDTH / MONITOR_WIDTH;
 
-    public static final Duration ANIMATION_DURATION = Duration.seconds(0.33);
+    public static final Duration ANIMATION_DURATION = Duration.seconds(0.16);
 
     /**
      * How often to read from the data source to pull latest info.

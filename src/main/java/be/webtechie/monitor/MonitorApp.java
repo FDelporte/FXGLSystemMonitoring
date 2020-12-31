@@ -5,6 +5,7 @@ import be.webtechie.monitor.queue.QueueClient;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import javafx.collections.FXCollections;
+import javafx.scene.Cursor;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ public class MonitorApp extends GameApplication {
 
     @Override
     protected void initGame() {
+        getGameScene().setCursor(Cursor.DEFAULT);
+
         runOnce(() -> {
             var choiceBox = getUIFactoryService().newChoiceBox(FXCollections.observableArrayList("192.168.0.223", "Mock Data"));
             choiceBox.getSelectionModel().selectFirst();

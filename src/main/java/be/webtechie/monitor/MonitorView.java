@@ -2,9 +2,9 @@ package be.webtechie.monitor;
 
 import be.webtechie.monitor.data.Reading;
 import com.almasb.fxgl.animation.Interpolators;
-import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -60,6 +60,8 @@ public class MonitorView extends Parent implements ReadingHandler {
                 expand();
             }
         });
+
+        setCursor(Cursor.HAND);
 
         getChildren().addAll(bg, collapsedView);
     }
@@ -249,7 +251,10 @@ public class MonitorView extends Parent implements ReadingHandler {
             title.setTranslateX(APP_WIDTH / 2.0 - title.getLayoutBounds().getWidth() / 2.0);
             title.setTranslateY(50);
 
-            lineCharts.add(new CanvasLineChart("CPU", APP_WIDTH / 1.5, APP_HEIGHT / 1.5, Color.RED, reading -> reading.getCpuUsage()));
+            var chart = new CanvasLineChart("CPU", APP_WIDTH / 2.5, APP_HEIGHT / 2.5, Color.RED, reading -> reading.getCpuUsage());
+            chart.setTranslateY(title.getTranslateY() + 10);
+
+            lineCharts.add(chart);
 
             getChildren().addAll(title);
 
@@ -264,14 +269,15 @@ public class MonitorView extends Parent implements ReadingHandler {
 
     private static class CanvasLineChart extends VBox implements ReadingHandler {
 
-        private static final int PIXELS_PER_UNIT = 10;
-        private static final int MAX_ITEMS = APP_HEIGHT / PIXELS_PER_UNIT;
+        private final int PIXELS_PER_UNIT_X = 10;
+        private final int PIXELS_PER_UNIT_Y;
+        private final int MAX_ITEMS;
 
         private final String name;
         private final Color color;
         private final Function<Reading, Double> dataExtractor;
 
-        private Deque<Double> buffer = new ArrayDeque<>(MAX_ITEMS);
+        private Deque<Double> buffer;
 
         private double oldX = -1;
         private double oldY = -1;
@@ -283,12 +289,19 @@ public class MonitorView extends Parent implements ReadingHandler {
             this.color = color;
             this.dataExtractor = dataExtractor;
 
+            MAX_ITEMS = (int) (width / PIXELS_PER_UNIT_X);
+            buffer = new ArrayDeque<>(MAX_ITEMS);
+
+            PIXELS_PER_UNIT_Y = (int) (height / 100.0);
+
             Canvas canvas = new Canvas(width, height);
+            canvas.setTranslateX(15);
+
             g = canvas.getGraphicsContext2D();
 
             setAlignment(Pos.TOP_CENTER);
 
-            getChildren().addAll(canvas, getUIFactoryService().newText(name, Color.WHITE, 11.0 * MONITOR_SCALE_RATIO));
+            getChildren().addAll(canvas, getUIFactoryService().newText(name, Color.WHITE, 6.0 * MONITOR_SCALE_RATIO));
         }
 
         @Override
@@ -305,18 +318,31 @@ public class MonitorView extends Parent implements ReadingHandler {
         }
 
         private void render() {
+            g.setFill(Color.BLACK);
             g.clearRect(0, 0, g.getCanvas().getWidth(), g.getCanvas().getHeight());
+
+            g.setStroke(Color.WHITE);
+            g.setLineWidth(0.5);
+            g.setFill(Color.WHITE);
+
+            for (int y = 100; y >= 0; y -= 10) {
+                g.strokeLine(0, y * PIXELS_PER_UNIT_Y, g.getCanvas().getWidth(), y * PIXELS_PER_UNIT_Y);
+                g.fillText("" + (100 - y), 0, y * PIXELS_PER_UNIT_Y);
+            }
 
             g.setStroke(color);
             g.setLineWidth(2.5);
 
-            buffer.forEach(y -> {
+            buffer.forEach(dataY -> {
+                // invert
+                double y = 100 - dataY;
+
                 if (oldY > -1) {
                     g.strokeLine(
-                            oldX * PIXELS_PER_UNIT,
-                            oldY * 6,
-                            (oldX + 1) * PIXELS_PER_UNIT,
-                            y * 6
+                            25 + oldX * PIXELS_PER_UNIT_X,
+                            oldY * PIXELS_PER_UNIT_Y,
+                            25 + (oldX + 1) * PIXELS_PER_UNIT_X,
+                            y * PIXELS_PER_UNIT_Y
                     );
                 }
 
