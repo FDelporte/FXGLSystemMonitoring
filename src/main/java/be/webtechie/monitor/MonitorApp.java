@@ -2,6 +2,7 @@ package be.webtechie.monitor;
 
 import be.webtechie.monitor.data.Reading;
 import be.webtechie.monitor.queue.QueueClient;
+import be.webtechie.monitor.view.MonitorView;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import javafx.collections.FXCollections;
@@ -19,7 +20,7 @@ public class MonitorApp extends GameApplication {
 
     private static final String TOPIC_NAME = "topic/statsCollector";
 
-    private List<MonitorView> monitors = new ArrayList<>();
+    private final List<MonitorView> monitors = new ArrayList<>();
 
     private QueueClient queueClient;
 
@@ -37,13 +38,14 @@ public class MonitorApp extends GameApplication {
         getGameScene().setCursor(Cursor.DEFAULT);
 
         runOnce(() -> {
-            var choiceBox = getUIFactoryService().newChoiceBox(FXCollections.observableArrayList("192.168.0.223", "Mock Data"));
+            var choiceBox = getUIFactoryService().newChoiceBox(
+                    FXCollections.observableArrayList("192.168.0.223", "Mock Data")
+            );
             choiceBox.getSelectionModel().selectFirst();
 
             var btnOK = getUIFactoryService().newButton("OK");
             btnOK.setOnAction(e -> {
                 var result = choiceBox.getSelectionModel().getSelectedItem();
-
                 if ("Mock Data".equals(result)) {
                     startWithMockData();
                 } else {
@@ -75,19 +77,17 @@ public class MonitorApp extends GameApplication {
             addMonitor("Device-" + i, "192.100.255." + i);
         }
 
-        run(() -> {
-            monitors.forEach(m -> {
-                var t = random(0.5, 150000.0);
+        run(() -> monitors.forEach(m -> {
+            var t = random(0.5, 150000.0);
 
-                var reading = new Reading(
-                        noise1D(t * 7) * 100,
-                        (long) (noise1D((t + 1000) * 2) * 40),
-                        (long) (noise1D((t + 3000) * 3) * 75)
-                );
+            var reading = new Reading(
+                    noise1D(t * 7) * 100,
+                    (long) (noise1D((t + 1000) * 2) * 40),
+                    (long) (noise1D((t + 3000) * 3) * 75)
+            );
 
-                m.onReading(reading);
-            });
-        }, DATA_UPDATE_FREQUENCY);
+            m.onReading(reading);
+        }), DATA_UPDATE_FREQUENCY);
     }
 
     private MonitorView addMonitor(String name, String ipAddress) {

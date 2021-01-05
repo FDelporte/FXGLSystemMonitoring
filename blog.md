@@ -83,4 +83,11 @@ A full overview is available on [pypi.org/project/psutil](https://pypi.org/proje
 
 The [sources of this application are available on GitHub](https://github.com/FDelporte/FXGLSystemMonitoring).
 
+### Test extra load
+
+```
+$ sudo apt install stress
+$ stress --cpu 2
+```
+
 ## Conclusion
