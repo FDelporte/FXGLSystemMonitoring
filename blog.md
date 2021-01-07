@@ -8,12 +8,18 @@ developed by [Almas Baimagambetov](https://twitter.com/AlmasBaim).
 But a gaming engine can also be used for other applications. In this post we will be using it for a system monitoring
 tool which can run on a Raspberry Pi to monitor any device which can report its state to a queue.
 
+https://vimeo.com/497975677
+
 ## Diagram
 
 For this post a proof-of-concept has been set up using a Raspberry Pi as the "central system" to host the queue (
 Mosquitto) and run the JavaFX dashboard.
 
 ![Diagram test setup](images/diagram.png)
+
+## Mosquitto
+
+TODO
 
 ### Installing Mosquitto on the Raspberry Pi
 
@@ -83,11 +89,39 @@ A full overview is available on [pypi.org/project/psutil](https://pypi.org/proje
 
 The [sources of this application are available on GitHub](https://github.com/FDelporte/FXGLSystemMonitoring).
 
-### Test extra load
+### Running the application with Mock data
+
+When the application starts, you have the choice to select between an IP address of the Raspberry Pi with the Mosquitto
+queue and "Mock Data". When selecting this second option 16 devices will be created inside the application which
+generate random data. This is ideal to test all functions of the application.
+
+![Select the Mock Data at start-up](images/mock-selection.png)
+![Overview of all the devices](images/mock-overview.png)
+![Detailed CPU chart](images/mock-cpu-graph.png)
+
+### Running the application with real data
+
+Restart the application and select the IP address. As soon as data is received from a device with a new IP address, a
+new tile is created to visualize the data. Start the Python script on a few devices to see the result as shown in the
+video below.
+
+https://vimeo.com/497976030
+
+As you can see in the video, my Pi's are not very busy. By using the stress-tool we can trigger additional load on the
+device to test the visualization in our dashboard.
+
+On my Raspberry Pi (B4 8Gb memory) the cpu-command only impacts the CPU value, while the vm-command causes both higher
+CPU and memory usage.
 
 ```
 $ sudo apt install stress
 $ stress --cpu 2
+$ stress --vm 4 --vm-bytes 1024M
 ```
 
 ## Conclusion
+
+TODO
+
+* Indicate device which hasn't send data in the last X seconds and turn the view to red
+

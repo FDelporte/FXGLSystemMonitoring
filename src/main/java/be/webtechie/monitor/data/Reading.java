@@ -7,8 +7,6 @@ import jakarta.json.bind.annotation.JsonbProperty;
  */
 public final class Reading {
 
-    // These values represent % and are in [0.0 .. 100.0] range
-
     @JsonbProperty("hostname")
     private String hostname;
 
@@ -31,10 +29,10 @@ public final class Reading {
         // NOP needed for JSON mapping
     }
 
-    public Reading(double cpuUsage, long ramUsage, long networkReceived) {
+    public Reading(double cpuUsage, double ramPercent, long networkReceived) {
         this.cpuUsage = cpuUsage;
         virtualMemory = new VirtualMemory();
-        virtualMemory.setUsed(ramUsage);
+        virtualMemory.setPercent(ramPercent);
         network = new Network();
         network.setPacketsReceived(networkReceived);
     }
@@ -98,6 +96,6 @@ public final class Reading {
      * @return a new (effectively immutable) object that contains reading information for internal buffer
      */
     public Reading copy() {
-        return new Reading(cpuUsage, virtualMemory.getUsed(), network.getPacketsReceived());
+        return new Reading(cpuUsage, virtualMemory.getPercent(), network.getPacketsReceived());
     }
 }

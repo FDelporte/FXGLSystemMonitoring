@@ -4,6 +4,9 @@ import socket
 import psutil
 import time
 
+# sudo apt install python3-pip	#command for Python 3
+# sudo apt install python-pip 	#command for Python 2
+
 # pip install paho-mqtt
 
 # On MacOS: first install Xcode and agree with the Xcode license agreement

@@ -29,7 +29,7 @@ class CollapsedView extends Parent implements ReadingHandler {
         titleIpAddress.setTranslateY(30);
 
         views.add(new LoadView("CPU", Reading::getCpuUsage));
-        views.add(new LoadView("RAM", r -> r.getVirtualMemory().getUsed() * 1.0));
+        views.add(new LoadView("RAM", r -> r.getVirtualMemory().getPercent()));
 
         HBox box = new HBox(5);
         box.setTranslateX(10);

@@ -73,7 +73,7 @@ public class MonitorApp extends GameApplication {
     }
 
     private void startWithMockData() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i <= 16; i++) {
             addMonitor("Device-" + i, "192.100.255." + i);
         }
 
