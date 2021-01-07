@@ -1,6 +1,5 @@
 package be.webtechie.monitor.view;
 
-import be.webtechie.monitor.ReadingHandler;
 import be.webtechie.monitor.data.Reading;
 import javafx.scene.Parent;
 import javafx.scene.paint.Color;

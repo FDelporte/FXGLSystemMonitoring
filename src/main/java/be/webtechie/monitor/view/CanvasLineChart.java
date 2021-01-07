@@ -1,6 +1,5 @@
 package be.webtechie.monitor.view;
 
-import be.webtechie.monitor.ReadingHandler;
 import be.webtechie.monitor.data.Reading;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;

@@ -1,6 +1,5 @@
 package be.webtechie.monitor.view;
 
-import be.webtechie.monitor.ReadingHandler;
 import be.webtechie.monitor.data.Reading;
 import com.almasb.fxgl.animation.Interpolators;
 import javafx.geometry.Point2D;
