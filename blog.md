@@ -5,15 +5,14 @@ In a previous post
 we already have taken a look at the [FXGL game development framework](https://github.com/AlmasB/FXGL)
 developed by [Almas Baimagambetov](https://twitter.com/AlmasBaim).
 
-But, this gaming engine can also be used for other use-cases. In this post we will be building a system monitoring
-dashboard which can run on a Raspberry Pi to keep an eye on any device which can report its state to a queue.
+But, this game engine can also be used for other use cases. In this post we will be building a system monitoring dashboard, which can run on a Raspberry Pi. The dashboard can be used to keep an eye on any device that can report its state to a queue.
 
-## Application description
+## Application Description
 
 For this post a proof-of-concept has been set up using one Raspberry Pi as the "central system" to host the queue
-(Mosquitto). On this Raspberry Pi and others, a Python script runs to send the device state every second to this queue.
-For every new device (IP address) which appears in the list, a new "tile" is created to show some of the data. By
-clicking on this tile, a new screen is opened with a chart.
+(Mosquitto). On this Raspberry Pi and others, a Python script runs to send the device state every second to the queue.
+For every new device (determined by the IP address) that appears in the list, a new dashboard "tile" is created to show some of the data. By
+clicking on this tile, we can enlarge the tile view to incorporate all of the data being received.
 
 ![Diagram test setup](images/diagram.png)
 
@@ -63,7 +62,7 @@ windows. In the first one we start a listener on topic "testing/TestTopic":
 $ mosquitto_sub -v -t 'testing/TestTopic'
 ```
 
-In the second terminal we send multiple commands with a message for this topic, like this:
+In the second terminal we send multiple commands with a message for this specific topic, like this:
 
 ```
 $ mosquitto_pub -t 'testing/TestTopic' -m 'hello world'
@@ -76,7 +75,7 @@ Every "publish" from the second terminal window will appear in the first one as 
 {width: 80%}
 ![Testing Mosquitto on the Pi](images/mosquitto_testing.png)
 
-## Send state from Raspberry Pi
+## Send State from Raspberry Pi
 
 To send the state from all our Raspberry Pi-boards to Mosquitto, a
 [Python script is available in the GitHub project](https://github.com/FDelporte/FXGLSystemMonitoring/blob/main/python/statsSender.py)
@@ -84,9 +83,9 @@ To send the state from all our Raspberry Pi-boards to Mosquitto, a
 psutil"
 library. Of course the same could be done with Java, but let's embrace Python for once ;-)
 
-### Extra dependencies
+### Extra Dependencies
 
-If you started from the default Raspberry Pi OS, Python is already installed, we only need to add two extra libraries
+If you started from the default Raspberry Pi OS, Python is already installed. So we only need to add two extra libraries
 with the pip-command to send data to the queue (with paho) and get device status info (with psutil).
 
 ```
@@ -97,7 +96,7 @@ pip install psutil
 In this example we are only using a subset of all the data which is available from psutil to show as a proof-of-concept.
 A full overview is available on [pypi.org/project/psutil](https://pypi.org/project/psutil/).
 
-A small part of the Python-code shows how the virtual memory info is transferred:
+A small part of the Python code shows how the virtual memory info is transferred:
 
 ```
 virtual = psutil.virtual_memory()
@@ -123,7 +122,7 @@ client.connect(mosquitto)
 client.publish(topicName, jsonString)
 ```
 
-## Inside the monitoring application
+## Inside the Monitoring Application
 
 The application starts in MonitorApp which extends an FXGL GameApplication.
 
@@ -131,7 +130,7 @@ The [Java/JavaFX/FXGL Maven project](https://github.com/FDelporte/FXGLSystemMoni
 and view-packages to make the code easy to understand. Besides the expected FXGL-specific overrides
 (initSettings, initGame), we can find some nice examples of the additional features FXGL provides.
 
-For example the dialog box at start-up to select mock or real mode:
+For example the dialog box at start-up asks the user to select mock or real mode:
 
 ```
 runOnce(() -> {
@@ -154,7 +153,7 @@ runOnce(() -> {
 }, Duration.seconds(0.01));
 ```
 
-Another one is the run-method which generates random data for the mock-mode using noise1D:
+Another one is the `run()` method which, every second, runs the provided code. In this case, the code generates random data for the "mock" mode using [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise):
 
 ```
 run(() -> monitors.forEach(m -> {
@@ -172,9 +171,9 @@ run(() -> monitors.forEach(m -> {
 
 ### Incoming data
 
-By using JSONB the incoming data is converted to Java objects. Let's look for example at the VirtualMemory-class which
+By using JSONB the incoming data is converted to Java objects. For example, let's look at the `VirtualMemory` class which
 maps the Python data to a Java object. Each JsonbProperty has a name-value which is not required if the variable has the
-same name, but for clarity I prefer to still define it to avoid errors later when the Java-variable would be renamed.
+same name, but for clarity I prefer to still define it to avoid errors later when the Java variable is renamed.
 
 ```
 public class VirtualMemory {
@@ -203,8 +202,7 @@ public class VirtualMemory {
 
 ### Qeueu
 
-By using the ["org.eclipse.paho.client.mqttv3" dependency](https://www.eclipse.org/paho/), connecting to the queue is
-pretty easy.
+By using the ["org.eclipse.paho.client.mqttv3" dependency](https://www.eclipse.org/paho/), we can easily connect to the queue:
 
 ```
 MqttClient client = new MqttClient("tcp://" + ipAddress + ":1883", MqttClient.generateClientId());
@@ -212,7 +210,7 @@ client.setCallback(new ClientCallback(readings));
 client.subscribe(topicName);
 ```
 
-The ClientCallBack gets called each time a message is available in the topic.
+The ClientCallBack gets called each time a message is available for the topic that we mentioned earlier.
 
 ```
 @Override
@@ -224,15 +222,39 @@ public void messageArrived(String s, MqttMessage mqttMessage) {
 
 ### The view components
 
-All the views are split into separate JavaFX Nodes making clever use of boxes, lines,...
+All the views are split into separate JavaFX Nodes. The overall `MonitorView` is responsible for handling both the `CollapsedView` and the `ExpandedView`, which in turn delegate their responsibility to `LoadView` and `CanvasLineChart` respectively. An illustrative example of these relationships is provided below:
 
-TODO Almas can you provide a little etra info here?
+```
+App uses MonitorView
 
-### Running the application with Mock data
+MonitorView uses CollapsedView and ExpandedView
+
+CollapsedView uses LoadView
+
+ExpandedView uses CanvasLineChart
+```
+
+All these views implement the `ReadingHandler` callback, which notifies each view when a new reading from the queue is available. Therefore, all views can easily be updated following this notification.
+
+
+### Animations
+
+Each dashboard tile expands on click to fill the entire window. This expansion happens as an animation, which seamlessly transforms the `CollapsedView` into the `ExpandedView`. The animation itself makes use of the FXGL animation system using "fluent" API, where we can configure various properties, such as duration and interpolation. We also provide the JavaFX observable property that we are animating (`bg.widthProperty()`) and the values at the start and end of the animation:
+
+```
+animationBuilder()
+        .duration(ANIMATION_DURATION)
+        .interpolator(Interpolators.EXPONENTIAL.EASE_OUT())
+        .animate(bg.widthProperty())
+        .from(MONITOR_WIDTH)
+        .to(APP_WIDTH)
+        .buildAndPlay();
+```
+
+### Running the Application with Mock Data
 
 When the application starts, you have the choice to select between an IP address of the Raspberry Pi with the Mosquitto
-queue and "Mock Data". After selecting this second option 16 devices will be created inside the application which
-generate random data. This is ideal to test all functions of the application.
+queue and "Mock Data". After selecting this second option, 16 devices will be created inside the application, where each device is driven by the randomly generated data. This is ideal for testing all of the application functions.
 
 ![Select the Mock Data at start-up](images/mock-selection.png)
 ![Overview of all the devices](images/mock-overview.png)
@@ -260,17 +282,16 @@ $ stress --vm 4 --vm-bytes 1024M
 
 ## Conclusion
 
-Yes I know, something similar could be done with the magnificent
-[TilesFX library of Gerrit Grunwald](https://github.com/HanSolo/tilesfx) but we deliberately took another approach to
+It should be noted that something similar could be done with the magnificent
+[TilesFX library by Gerrit Grunwald](https://github.com/HanSolo/tilesfx) but we deliberately took another approach to
 show you how you can create visualization components with JavaFX and FXGL yourself. Combined with the right libraries
-for JsonB and Paho, Java proves again that very powerful applications can be created with minimal code which is easy to
+for JsonB and Paho, Java proves, yet again, that very powerful applications can be created with minimal code which is easy to
 read and extend.
 
 As this is just a proof-of-concept, there is still a lot of room for improvement... Just a few ideas:
 
 * Indicate devices which haven't sent data in the last X seconds and turn the view background to red
 * Combine multiple values on the chart
-* Provide additional info on the expanded view
-* ...
+* Provide additional info inside the expanded view
 
-Feel free to use this project as a starting-point or as inspiration, but please share what you have created!
+Feel free to use this project as a starting point or as an inspiration, but please share what you have created!
