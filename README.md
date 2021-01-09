@@ -5,8 +5,8 @@ central queue (Mosquitto).
 
 Full description is available on
 
-* foojay.io --> link TODO
-* webtechie.be --> link TODO
+* [foojay.io]()
+* [webtechie.be]()
 
 ![Overview](images/diagram.png)
 
@@ -23,3 +23,11 @@ One single python-script to run on each Raspberry Pi which needs to be displayed
 If you want to start this script automatically, see
 ["How to start a python script at boot"](https://raspberrypi.stackexchange.com/questions/108694/how-to-start-a-python-script-at-boot)
 .
+
+## Screenshots
+
+![](images/mock-selection.png)
+
+![](images/mock-overview.png)
+
+![](images/mock-cpu-graph.png)
